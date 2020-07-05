@@ -1,3 +1,6 @@
-import { greet } from 'game';
+import { Engine } from 'bandori-puyopuyo';
+import { memory } from 'bandori-puyopuyo/bandori_puyopuyo_bg';
 
-greet();
+const engine = Engine.new(80, 90);
+
+console.log(engine.get_width());
