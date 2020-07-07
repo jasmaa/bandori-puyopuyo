@@ -1,5 +1,5 @@
-mod utils;
 mod board;
+mod utils;
 use board::Board;
 
 use wasm_bindgen::prelude::*;
@@ -9,7 +9,6 @@ use wasm_bindgen::prelude::*;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -33,20 +32,58 @@ pub enum Direction {
 }
 
 #[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Sprite {
+    Kasumi,
+    Tae,
+    Rimi,
+    Saaya,
+    Arisa,
+    Ran,
+    Moca,
+    Himari,
+    Tomoe,
+    Tsugumi,
+    Aya,
+    Hina,
+    Chisato,
+    Maya,
+    Eve,
+    Yukina,
+    Sayo,
+    Lisa,
+    Ako,
+    Rinko,
+    Kokoro,
+    Kaoru,
+    Hagumi,
+    Kanon,
+    Misaki,
+}
+
+#[wasm_bindgen]
 pub struct Engine {
     width: u32,
     height: u32,
+    sprite_board: Board<Sprite>,
     affiliation_board: Board<Affiliation>,
     direction_board: Board<Direction>,
 }
 
+impl Engine {
+    pub fn clear() {
+
+    }
+}
+
 #[wasm_bindgen]
 impl Engine {
-
     pub fn new(width: u32, height: u32) -> Engine {
         Engine {
             width: width,
             height: height,
+            sprite_board: Board::new(width, height),
             affiliation_board: Board::new(width, height),
             direction_board: Board::new(width, height),
         }
@@ -58,5 +95,10 @@ impl Engine {
 
     pub fn get_height(&self) -> u32 {
         self.height
+    }
+
+    pub fn tick(&mut self) {
+
+        self.affiliation_board.floodfill(0, 0, Affiliation::Popipa);
     }
 }
