@@ -6,4 +6,7 @@ console.log(Affiliation);
 const engine = Engine.new(10, 20);
 
 console.log(engine.get_width());
+
+//engine.move_piece_right();
+
 console.log(engine.render());
