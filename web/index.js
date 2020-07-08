@@ -1,12 +1,29 @@
 import { Engine, Affiliation } from 'bandori-puyopuyo';
 import { memory } from 'bandori-puyopuyo/bandori_puyopuyo_bg';
 
-console.log(Affiliation);
+const board = document.getElementById('board');
+const engine = Engine.new(9, 20);
 
-const engine = Engine.new(10, 20);
+window.onkeydown = e => {
+    switch (e.keyCode) {
+        case 38:
+            break
+        case 39:
+            engine.move_piece_right();
+            break;
+        case 40:
+            break;
+        case 37:
+            //engine.move_piece_left();
+            break;
+    }
 
-console.log(engine.get_width());
+    console.log(e.keyCode);
+}
 
-//engine.move_piece_right();
+function tick() {
+    board.innerHTML = engine.render();
+    requestAnimationFrame(tick);
+}
 
-console.log(engine.render());
+requestAnimationFrame(tick);
