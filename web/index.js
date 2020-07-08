@@ -14,11 +14,9 @@ window.onkeydown = e => {
         case 40:
             break;
         case 37:
-            //engine.move_piece_left();
+            engine.move_piece_left();
             break;
     }
-
-    console.log(e.keyCode);
 }
 
 function tick() {
