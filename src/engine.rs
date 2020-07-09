@@ -1,5 +1,5 @@
-// Engine
-
+// engine.rs
+// PuyoPuyo engine
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
@@ -8,28 +8,9 @@ use enums::Affiliation;
 use enums::Direction;
 use enums::Sprite;
 
-// PuyoPuyo piece
-pub struct Piece {
-    pub row: u32,
-    pub col: u32,
-    sprite: Sprite,
-    affiliation: Affiliation,
-    pub direction: Direction,
-}
+mod piece;
+use piece::Piece;
 
-impl Piece {
-    pub fn new(row: u32, col: u32, sprite: Sprite, affiliation: Affiliation) -> Piece {
-        Piece {
-            row: row,
-            col: col,
-            sprite: sprite,
-            affiliation: affiliation,
-            direction: Direction::Down,
-        }
-    }
-}
-
-// PuyoPuyo engine
 #[wasm_bindgen]
 pub struct Engine {
     width: u32,
@@ -316,23 +297,6 @@ impl Engine {
     }
 }
 
-impl fmt::Display for Engine {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.affiliation_data.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = match cell {
-                    Some(v) => format!("{}", v as i32),
-                    None => String::from("-"),
-                };
-                write!(f, "{}", symbol)?;
-            }
-            write!(f, "\n")?;
-        }
-
-        Ok(())
-    }
-}
-
 impl Engine {
     // Calculates index from grid row and column
     pub fn get_index(&self, row: u32, col: u32) -> usize {
@@ -439,5 +403,22 @@ impl Engine {
         self.affiliation_data[new_idx_2] = Some(self.piece.affiliation);
         self.direction_data[new_idx_1] = Some(self.piece.direction);
         self.direction_data[new_idx_2] = Some(self.piece.direction);
+    }
+}
+
+impl fmt::Display for Engine {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for line in self.affiliation_data.as_slice().chunks(self.width as usize) {
+            for &cell in line {
+                let symbol = match cell {
+                    Some(v) => format!("{}", v as i32),
+                    None => String::from("-"),
+                };
+                write!(f, "{}", symbol)?;
+            }
+            write!(f, "\n")?;
+        }
+
+        Ok(())
     }
 }
