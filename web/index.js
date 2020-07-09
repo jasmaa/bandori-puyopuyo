@@ -5,18 +5,24 @@ const board = document.getElementById('board');
 const engine = Engine.new(9, 20);
 
 window.onkeydown = e => {
-    switch (e.keyCode) {
-        case 38:
-            break
-        case 39:
-            engine.move_piece_right();
-            break;
-        case 40:
-            break;
-        case 37:
-            engine.move_piece_left();
-            break;
+
+    if (engine.can_move_piece_down()) {
+        switch (e.keyCode) {
+            case 39:
+                engine.move_piece_right();
+                break;
+            case 40:
+                engine.move_piece_down();
+                break;
+            case 37:
+                engine.move_piece_left();
+                break;
+            case 90:
+                engine.rotate_piece();
+        }
     }
+
+    //console.log(e);
 }
 
 let startTime = new Date().getTime();

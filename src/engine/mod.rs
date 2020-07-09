@@ -48,13 +48,15 @@ impl Engine {
             height: height,
             piece: Piece::new(0, width / 2, Sprite::Kasumi, Affiliation::Popipa),
             sprite_data: (0..width * height).map(|_| None).collect(),
-            affiliation_data: (0..width * height).map(|i| {
-                if i < 100 {
-                    None
-                } else {
-                    Some(Affiliation::Harohapi)
-                }
-            }).collect(),
+            affiliation_data: (0..width * height)
+                .map(|i| {
+                    if i < 100 {
+                        None
+                    } else {
+                        Some(Affiliation::Harohapi)
+                    }
+                })
+                .collect(),
             direction_data: (0..width * height).map(|_| None).collect(),
         };
         let piece_idx_1 = engine.get_index(engine.piece.row, engine.piece.col);
@@ -80,6 +82,7 @@ impl Engine {
         self.to_string()
     }
 
+    // Move piece right
     pub fn move_piece_right(&mut self) {
         match self.piece.direction {
             Direction::Up => {
@@ -129,6 +132,7 @@ impl Engine {
         }
     }
 
+    // Move piece left
     pub fn move_piece_left(&mut self) {
         match self.piece.direction {
             Direction::Up => {
@@ -178,6 +182,7 @@ impl Engine {
         }
     }
 
+    // Move piece down
     pub fn move_piece_down(&mut self) {
         match self.piece.direction {
             Direction::Up => {
@@ -230,17 +235,84 @@ impl Engine {
         }
     }
 
+    // Checks if piece can be moved down
+    pub fn can_move_piece_down(&mut self) -> bool {
+        match self.piece.direction {
+            Direction::Up => {
+                let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx] == None
+                    && self.affiliation_data[down_idx] == None
+            }
+            Direction::Right => {
+                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
+                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col + 1);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx_1] == None
+                    && self.affiliation_data[down_idx_2] == None
+            }
+            Direction::Down => {
+                let down_idx = self.get_index(self.piece.row + 2, self.piece.col);
+                self.piece.row + 1 < self.height - 1 && self.affiliation_data[down_idx] == None
+            }
+            Direction::Left => {
+                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
+                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col - 1);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx_1] == None
+                    && self.affiliation_data[down_idx_2] == None
+            }
+        }
+    }
+
+    // Rotate piece clockwise
     pub fn rotate_piece(&mut self) {
         match self.piece.direction {
-            Direction::Up => {}
-            Direction::Right => {}
-            Direction::Down => {}
-            Direction::Left => {}
+            Direction::Up => {
+                let curr_idx_1 = self.get_index(self.piece.row, self.piece.col);
+                let curr_idx_2 = self.get_index(self.piece.row - 1, self.piece.col);
+                let right_idx = self.get_index(self.piece.row, self.piece.col + 1);
+                if self.piece.col + 1 < self.width && self.affiliation_data[right_idx] == None {
+                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, right_idx);
+                    self.piece.direction = Direction::Right;
+                }
+            }
+            Direction::Right => {
+                let curr_idx_1 = self.get_index(self.piece.row, self.piece.col);
+                let curr_idx_2 = self.get_index(self.piece.row, self.piece.col + 1);
+                let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
+                if self.piece.row + 1 < self.height && self.affiliation_data[down_idx] == None {
+                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, down_idx);
+                    self.piece.direction = Direction::Down;
+                }
+            }
+            Direction::Down => {
+                let curr_idx_1 = self.get_index(self.piece.row, self.piece.col);
+                let curr_idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
+                let left_idx = self.get_index(self.piece.row, self.piece.col - 1);
+                if self.piece.col as i32 - 1 >= 0 && self.affiliation_data[left_idx] == None {
+                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, left_idx);
+                    self.piece.direction = Direction::Left;
+                }
+            }
+            Direction::Left => {
+                let curr_idx_1 = self.get_index(self.piece.row, self.piece.col);
+                let curr_idx_2 = self.get_index(self.piece.row, self.piece.col - 1);
+                let up_idx = self.get_index(self.piece.row - 1, self.piece.col);
+                if self.piece.row as i32 - 1 >= 0 && self.affiliation_data[up_idx] == None {
+                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, up_idx);
+                    self.piece.direction = Direction::Up;
+                }
+            }
         }
     }
 
     pub fn tick(&mut self) {
-        self.move_piece_down()
+        if self.can_move_piece_down() {
+            self.move_piece_down();
+        } else {
+            // TODO: stick, clear, and respawn here
+        }
     }
 }
 
