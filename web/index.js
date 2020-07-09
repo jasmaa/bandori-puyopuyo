@@ -19,8 +19,20 @@ window.onkeydown = e => {
     }
 }
 
+let startTime = new Date().getTime();
+const UPDATE_DELTA = 1000;
+
 function tick() {
+
     board.innerHTML = engine.render();
+
+    const currTime = new Date().getTime();
+    const delta = currTime - startTime;
+    if (delta >= UPDATE_DELTA) {
+        engine.tick();
+        startTime = currTime;
+    }
+
     requestAnimationFrame(tick);
 }
 
