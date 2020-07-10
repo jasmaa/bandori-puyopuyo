@@ -27,27 +27,12 @@ impl Engine {
         let mut engine = Engine {
             width: width,
             height: height,
-            piece: Piece::new(0, width / 2, Sprite::Kasumi, Affiliation::Popipa),
+            piece: Piece::new(0, 0, Sprite::Kasumi, Affiliation::Popipa),
             sprite_data: (0..width * height).map(|_| None).collect(),
-            affiliation_data: (0..width * height)
-                .map(|i| {
-                    if i < 100 {
-                        None
-                    } else {
-                        Some(Affiliation::Harohapi)
-                    }
-                })
-                .collect(),
+            affiliation_data: (0..width * height).map(|_| None).collect(),
             direction_data: (0..width * height).map(|_| None).collect(),
         };
-        let piece_idx_1 = engine.get_index(engine.piece.row, engine.piece.col);
-        let piece_idx_2 = engine.get_index(engine.piece.row + 1, engine.piece.col);
-        engine.sprite_data[piece_idx_1] = Some(engine.piece.sprite);
-        engine.sprite_data[piece_idx_2] = Some(engine.piece.sprite);
-        engine.affiliation_data[piece_idx_1] = Some(engine.piece.affiliation);
-        engine.affiliation_data[piece_idx_2] = Some(engine.piece.affiliation);
-        engine.direction_data[piece_idx_1] = Some(engine.piece.direction);
-        engine.direction_data[piece_idx_2] = Some(engine.piece.direction);
+        engine.respawn_piece(Sprite::Kasumi);
         engine
     }
 
@@ -309,18 +294,24 @@ impl Engine {
             self.move_piece_down();
         } else {
             // TODO: stick, clear, and respawn here
-            self.respawn_piece(Sprite::Kasumi, Affiliation::Popipa)
+            if self.count_blob(self.piece.row, self.piece.col) >= 10 {
+                self.clear_blob(self.piece.row, self.piece.col)
+            }
+
+            let v = (js_sys::Math::random() * 25.0) as u32;
+
+            self.respawn_piece(Sprite::from_u32(v))
         }
     }
 }
 
 impl Engine {
 
-    pub fn respawn_piece(&mut self, sprite: Sprite, affiliation: Affiliation){
+    pub fn respawn_piece(&mut self, sprite: Sprite){
         self.piece.row = 0;
         self.piece.col = self.width / 2;
         self.piece.sprite = sprite;
-        self.piece.affiliation = affiliation;
+        self.piece.affiliation = sprite.get_affiliation();
         self.piece.direction = Direction::Down;
 
         let idx_1 = self.get_index(self.piece.row, self.piece.col);
