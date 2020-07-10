@@ -75,7 +75,8 @@ impl Engine {
                     && self.affiliation_data[right_idx_1] == None
                     && self.affiliation_data[right_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, right_idx_1, right_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(right_idx_1, right_idx_2);
                     self.piece.col += 1;
                 }
             }
@@ -84,7 +85,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col + 1);
                 let right_idx = self.get_index(self.piece.row, self.piece.col + 2);
                 if self.piece.col + 1 < self.width - 1 && self.affiliation_data[right_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_2, right_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_2, right_idx);
                     self.piece.col += 1;
                 }
             }
@@ -97,7 +99,8 @@ impl Engine {
                     && self.affiliation_data[right_idx_1] == None
                     && self.affiliation_data[right_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, right_idx_1, right_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(right_idx_1, right_idx_2);
                     self.piece.col += 1;
                 }
             }
@@ -106,7 +109,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col - 1);
                 let right_idx = self.get_index(self.piece.row, self.piece.col + 1);
                 if self.piece.col < self.width - 1 && self.affiliation_data[right_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, right_idx, curr_idx_1);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(right_idx, curr_idx_1);
                     self.piece.col += 1;
                 }
             }
@@ -125,7 +129,8 @@ impl Engine {
                     && self.affiliation_data[left_idx_1] == None
                     && self.affiliation_data[left_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, left_idx_1, left_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(left_idx_1, left_idx_2);
                     self.piece.col -= 1;
                 }
             }
@@ -134,7 +139,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col + 1);
                 let left_idx = self.get_index(self.piece.row, self.piece.col - 1);
                 if self.piece.col > 0 && self.affiliation_data[left_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, left_idx, curr_idx_1);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(left_idx, curr_idx_1);
                     self.piece.col -= 1;
                 }
             }
@@ -147,7 +153,8 @@ impl Engine {
                     && self.affiliation_data[left_idx_1] == None
                     && self.affiliation_data[left_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, left_idx_1, left_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(left_idx_1, left_idx_2);
                     self.piece.col -= 1;
                 }
             }
@@ -156,7 +163,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col - 1);
                 let left_idx = self.get_index(self.piece.row, self.piece.col - 2);
                 if self.piece.col - 1 > 0 && self.affiliation_data[left_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_2, left_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_2, left_idx);
                     self.piece.col -= 1;
                 }
             }
@@ -174,7 +182,8 @@ impl Engine {
                     && self.affiliation_data[down_idx] == None
                     && self.affiliation_data[down_idx] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, down_idx, curr_idx_1);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(down_idx, curr_idx_1);
                     self.piece.row += 1;
                 }
             }
@@ -187,7 +196,8 @@ impl Engine {
                     && self.affiliation_data[down_idx_1] == None
                     && self.affiliation_data[down_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, down_idx_1, down_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(down_idx_1, down_idx_2);
                     self.piece.row += 1;
                 }
             }
@@ -196,7 +206,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
                 let down_idx = self.get_index(self.piece.row + 2, self.piece.col);
                 if self.piece.row + 1 < self.height - 1 && self.affiliation_data[down_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_2, down_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_2, down_idx);
                     self.piece.row += 1;
                 }
             }
@@ -209,7 +220,8 @@ impl Engine {
                     && self.affiliation_data[down_idx_1] == None
                     && self.affiliation_data[down_idx_2] == None
                 {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, down_idx_1, down_idx_2);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(down_idx_1, down_idx_2);
                     self.piece.row += 1;
                 }
             }
@@ -254,7 +266,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row - 1, self.piece.col);
                 let right_idx = self.get_index(self.piece.row, self.piece.col + 1);
                 if self.piece.col + 1 < self.width && self.affiliation_data[right_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, right_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_1, right_idx);
                     self.piece.direction = Direction::Right;
                 }
             }
@@ -263,7 +276,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col + 1);
                 let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
                 if self.piece.row + 1 < self.height && self.affiliation_data[down_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, down_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_1, down_idx);
                     self.piece.direction = Direction::Down;
                 }
             }
@@ -272,7 +286,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
                 let left_idx = self.get_index(self.piece.row, self.piece.col - 1);
                 if self.piece.col as i32 - 1 >= 0 && self.affiliation_data[left_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, left_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_1, left_idx);
                     self.piece.direction = Direction::Left;
                 }
             }
@@ -281,7 +296,8 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col - 1);
                 let up_idx = self.get_index(self.piece.row - 1, self.piece.col);
                 if self.piece.row as i32 - 1 >= 0 && self.affiliation_data[up_idx] == None {
-                    self.update_board_piece(curr_idx_1, curr_idx_2, curr_idx_1, up_idx);
+                    self.delete_board_piece(curr_idx_1, curr_idx_2);
+                    self.place_board_piece(curr_idx_1, up_idx);
                     self.piece.direction = Direction::Up;
                 }
             }
@@ -293,11 +309,25 @@ impl Engine {
             self.move_piece_down();
         } else {
             // TODO: stick, clear, and respawn here
+            self.respawn_piece(Sprite::Kasumi, Affiliation::Popipa)
         }
     }
 }
 
 impl Engine {
+
+    pub fn respawn_piece(&mut self, sprite: Sprite, affiliation: Affiliation){
+        self.piece.row = 0;
+        self.piece.col = self.width / 2;
+        self.piece.sprite = sprite;
+        self.piece.affiliation = affiliation;
+        self.piece.direction = Direction::Down;
+
+        let idx_1 = self.get_index(self.piece.row, self.piece.col);
+        let idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
+        self.place_board_piece(idx_1, idx_2);
+    }
+
     // Calculates index from grid row and column
     pub fn get_index(&self, row: u32, col: u32) -> usize {
         (self.width * row + col) as usize
@@ -383,26 +413,24 @@ impl Engine {
         }
     }
 
-    // Update piece on all boards
-    fn update_board_piece(
-        &mut self,
-        curr_idx_1: usize,
-        curr_idx_2: usize,
-        new_idx_1: usize,
-        new_idx_2: usize,
-    ) {
-        self.sprite_data[curr_idx_1] = None;
-        self.sprite_data[curr_idx_2] = None;
-        self.affiliation_data[curr_idx_1] = None;
-        self.affiliation_data[curr_idx_2] = None;
-        self.direction_data[curr_idx_1] = None;
-        self.direction_data[curr_idx_2] = None;
-        self.sprite_data[new_idx_1] = Some(self.piece.sprite);
-        self.sprite_data[new_idx_2] = Some(self.piece.sprite);
-        self.affiliation_data[new_idx_1] = Some(self.piece.affiliation);
-        self.affiliation_data[new_idx_2] = Some(self.piece.affiliation);
-        self.direction_data[new_idx_1] = Some(self.piece.direction);
-        self.direction_data[new_idx_2] = Some(self.piece.direction);
+    // Place piece on board
+    fn place_board_piece(&mut self, idx_1: usize, idx_2: usize) {
+        self.sprite_data[idx_1] = Some(self.piece.sprite);
+        self.sprite_data[idx_2] = Some(self.piece.sprite);
+        self.affiliation_data[idx_1] = Some(self.piece.affiliation);
+        self.affiliation_data[idx_2] = Some(self.piece.affiliation);
+        self.direction_data[idx_1] = Some(self.piece.direction);
+        self.direction_data[idx_2] = Some(self.piece.direction);
+    }
+
+    // Delete piece from board
+    fn delete_board_piece(&mut self, idx_1: usize, idx_2: usize) {
+        self.sprite_data[idx_1] = None;
+        self.sprite_data[idx_2] = None;
+        self.affiliation_data[idx_1] = None;
+        self.affiliation_data[idx_2] = None;
+        self.direction_data[idx_1] = None;
+        self.direction_data[idx_2] = None;
     }
 }
 
