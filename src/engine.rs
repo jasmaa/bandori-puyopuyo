@@ -512,7 +512,7 @@ impl Engine {
         }
     }
     fn find_ground_row(&self, row: u32, col: u32) -> u32 {
-        for curr_row in (0..row - 1).rev() {
+        for curr_row in (row + 1)..self.height {
             let curr_idx = self.get_index(curr_row, col);
             if self.affiliation_data[curr_idx] != None {
                 return curr_row - 1;
