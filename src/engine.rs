@@ -1,15 +1,19 @@
 // engine.rs
 // PuyoPuyo engine
+use std::cmp::min;
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
 pub mod enums;
 use enums::Affiliation;
 use enums::Direction;
+use enums::PiecePart;
 use enums::Sprite;
 
 mod piece;
 use piece::Piece;
+
+extern crate console_error_panic_hook;
 
 #[wasm_bindgen]
 pub struct Engine {
@@ -19,18 +23,21 @@ pub struct Engine {
     sprite_data: Vec<Option<Sprite>>,
     affiliation_data: Vec<Option<Affiliation>>,
     direction_data: Vec<Option<Direction>>,
+    piece_part_data: Vec<Option<PiecePart>>,
 }
 
 #[wasm_bindgen]
 impl Engine {
     pub fn new(width: u32, height: u32) -> Engine {
+        console_error_panic_hook::set_once();
         let mut engine = Engine {
             width: width,
             height: height,
-            piece: Piece::new(0, 0, Sprite::Kasumi, Affiliation::Popipa),
+            piece: Piece::new(0, 0, Sprite::Kasumi),
             sprite_data: (0..width * height).map(|_| None).collect(),
             affiliation_data: (0..width * height).map(|_| None).collect(),
             direction_data: (0..width * height).map(|_| None).collect(),
+            piece_part_data: (0..width * height).map(|_| None).collect(),
         };
         engine.respawn_piece(Sprite::Kasumi);
         engine
@@ -289,29 +296,29 @@ impl Engine {
         }
     }
 
+    // Update game
     pub fn tick(&mut self) {
         if self.can_move_piece_down() {
             self.move_piece_down();
         } else {
-            // TODO: stick, clear, and respawn here
+            // Check if can clear
             if self.count_blob(self.piece.row, self.piece.col) >= 10 {
-                self.clear_blob(self.piece.row, self.piece.col)
+                self.clear_blob(self.piece.row, self.piece.col);
+                self.apply_gravity(); // TODO: do repeated clearing and gravity
             }
 
-            let v = (js_sys::Math::random() * 25.0) as u32;
-
-            self.respawn_piece(Sprite::from_u32(v))
+            // Respawn with random sprite
+            let v = (js_sys::Math::random() * 10.0) as u32;
+            self.respawn_piece(Sprite::from_u32(v));
         }
     }
 }
 
 impl Engine {
-
-    pub fn respawn_piece(&mut self, sprite: Sprite){
+    pub fn respawn_piece(&mut self, sprite: Sprite) {
         self.piece.row = 0;
         self.piece.col = self.width / 2;
         self.piece.sprite = sprite;
-        self.piece.affiliation = sprite.get_affiliation();
         self.piece.direction = Direction::Down;
 
         let idx_1 = self.get_index(self.piece.row, self.piece.col);
@@ -405,13 +412,19 @@ impl Engine {
     }
 
     // Place piece on board
+    fn place_piece(&mut self, idx_1: usize, idx_2: usize, sprite: Sprite, direction: Direction) {
+        self.sprite_data[idx_1] = Some(sprite);
+        self.sprite_data[idx_2] = Some(sprite);
+        self.affiliation_data[idx_1] = Some(sprite.get_affiliation());
+        self.affiliation_data[idx_2] = Some(sprite.get_affiliation());
+        self.direction_data[idx_1] = Some(direction);
+        self.direction_data[idx_2] = Some(direction);
+        self.piece_part_data[idx_1] = Some(PiecePart::Head);
+        self.piece_part_data[idx_2] = Some(PiecePart::Tail);
+    }
+
     fn place_board_piece(&mut self, idx_1: usize, idx_2: usize) {
-        self.sprite_data[idx_1] = Some(self.piece.sprite);
-        self.sprite_data[idx_2] = Some(self.piece.sprite);
-        self.affiliation_data[idx_1] = Some(self.piece.affiliation);
-        self.affiliation_data[idx_2] = Some(self.piece.affiliation);
-        self.direction_data[idx_1] = Some(self.piece.direction);
-        self.direction_data[idx_2] = Some(self.piece.direction);
+        self.place_piece(idx_1, idx_2, self.piece.sprite, self.piece.direction)
     }
 
     // Delete piece from board
@@ -422,6 +435,90 @@ impl Engine {
         self.affiliation_data[idx_2] = None;
         self.direction_data[idx_1] = None;
         self.direction_data[idx_2] = None;
+        self.piece_part_data[idx_1] = None;
+        self.piece_part_data[idx_2] = None;
+    }
+
+    // TODO: need to find whether piece is head or tail
+    fn apply_gravity(&mut self) {
+        for row in (0..self.height - 1).rev() {
+            for col in 0..self.width {
+                let curr_idx = self.get_index(row, col);
+                if self.affiliation_data[curr_idx] != None {
+                    match self.direction_data[curr_idx] {
+                        Some(Direction::Up) => {
+                            match self.piece_part_data[curr_idx] {
+                                Some(PiecePart::Head) => {
+                                    let up_idx = self.get_index(row - 1, col);
+                                    let ground_row = self.find_ground_row(row, col);
+                                    let new_idx_1 = self.get_index(ground_row, col);
+                                    let new_idx_2 = self.get_index(ground_row - 1, col);
+                                    self.delete_board_piece(curr_idx, up_idx);
+
+                                    let sprite = match self.sprite_data[curr_idx] {
+                                        Some(v) => v,
+                                        None => panic!("No piece sprite found"),
+                                    };
+                                    self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Up);
+                                }
+                                Some(PiecePart::Tail) => (),
+                                None => panic!("No piece part found"),
+                            };
+                        }
+                        Some(Direction::Right) => {
+                            let right_idx = self.get_index(row, col + 1);
+                            let ground_row = min(
+                                self.find_ground_row(row, col),
+                                self.find_ground_row(row, col + 1),
+                            );
+                            let new_idx_1 = self.get_index(ground_row, col);
+                            let new_idx_2 = self.get_index(ground_row, col + 1);
+                            //self.delete_board_piece(curr_idx, right_idx);
+                            //let sprite = self.sprite_data[curr_idx].unwrap();
+                            //self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Right);
+                        }
+                        Some(Direction::Down) => {
+                            match self.piece_part_data[curr_idx] {
+                                Some(PiecePart::Head) => {}
+                                Some(PiecePart::Tail) => {
+                                    let up_idx = self.get_index(row - 1, col);
+                                    let ground_row = self.find_ground_row(row, col);
+                                    let new_idx_1 = self.get_index(ground_row - 1, col);
+                                    let new_idx_2 = self.get_index(ground_row, col);
+
+                                    let sprite = self.sprite_data[curr_idx].unwrap();
+                                    self.delete_board_piece(up_idx, curr_idx);
+                                    self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Down);
+                                }
+                                None => panic!("No piece part found"),
+                            };
+                        }
+                        Some(Direction::Left) => {
+                            let left_idx = self.get_index(row, col - 1);
+                            let ground_row = min(
+                                self.find_ground_row(row, col),
+                                self.find_ground_row(row, col - 1),
+                            );
+                            let new_idx_1 = self.get_index(ground_row, col);
+                            let new_idx_2 = self.get_index(ground_row, col - 1);
+                            //self.delete_board_piece(curr_idx, left_idx);
+                            //let sprite = self.sprite_data[curr_idx].unwrap();
+                            //self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Left);
+                        }
+                        None => {}
+                    }
+                }
+            }
+        }
+    }
+    fn find_ground_row(&self, row: u32, col: u32) -> u32 {
+        for curr_row in (0..row - 1).rev() {
+            let curr_idx = self.get_index(curr_row, col);
+            if self.affiliation_data[curr_idx] != None {
+                return curr_row - 1;
+            }
+        }
+        self.height - 1
     }
 }
 

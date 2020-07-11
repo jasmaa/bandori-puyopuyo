@@ -3,6 +3,15 @@
 
 use wasm_bindgen::prelude::*;
 
+// Piece part
+#[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PiecePart {
+    Head,
+    Tail,
+}
+
 // Band affiliation
 #[wasm_bindgen]
 #[repr(u8)]
