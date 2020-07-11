@@ -453,29 +453,36 @@ impl Engine {
                                     let ground_row = self.find_ground_row(row, col);
                                     let new_idx_1 = self.get_index(ground_row, col);
                                     let new_idx_2 = self.get_index(ground_row - 1, col);
+                                    let sprite = self.sprite_data[curr_idx].unwrap();
                                     self.delete_board_piece(curr_idx, up_idx);
-
-                                    let sprite = match self.sprite_data[curr_idx] {
-                                        Some(v) => v,
-                                        None => panic!("No piece sprite found"),
-                                    };
                                     self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Up);
                                 }
-                                Some(PiecePart::Tail) => (),
+                                Some(PiecePart::Tail) => {}
                                 None => panic!("No piece part found"),
                             };
                         }
                         Some(Direction::Right) => {
-                            let right_idx = self.get_index(row, col + 1);
-                            let ground_row = min(
-                                self.find_ground_row(row, col),
-                                self.find_ground_row(row, col + 1),
-                            );
-                            let new_idx_1 = self.get_index(ground_row, col);
-                            let new_idx_2 = self.get_index(ground_row, col + 1);
-                            //self.delete_board_piece(curr_idx, right_idx);
-                            //let sprite = self.sprite_data[curr_idx].unwrap();
-                            //self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Right);
+                            match self.piece_part_data[curr_idx] {
+                                Some(PiecePart::Head) => {
+                                    let right_idx = self.get_index(row, col + 1);
+                                    let ground_row = min(
+                                        self.find_ground_row(row, col),
+                                        self.find_ground_row(row, col + 1),
+                                    );
+                                    let new_idx_1 = self.get_index(ground_row, col);
+                                    let new_idx_2 = self.get_index(ground_row, col + 1);
+                                    let sprite = self.sprite_data[curr_idx].unwrap();
+                                    self.delete_board_piece(curr_idx, right_idx);
+                                    self.place_piece(
+                                        new_idx_1,
+                                        new_idx_2,
+                                        sprite,
+                                        Direction::Right,
+                                    );
+                                }
+                                Some(PiecePart::Tail) => {}
+                                None => panic!("No piece part found"),
+                            };
                         }
                         Some(Direction::Down) => {
                             match self.piece_part_data[curr_idx] {
@@ -485,7 +492,6 @@ impl Engine {
                                     let ground_row = self.find_ground_row(row, col);
                                     let new_idx_1 = self.get_index(ground_row - 1, col);
                                     let new_idx_2 = self.get_index(ground_row, col);
-
                                     let sprite = self.sprite_data[curr_idx].unwrap();
                                     self.delete_board_piece(up_idx, curr_idx);
                                     self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Down);
@@ -494,16 +500,22 @@ impl Engine {
                             };
                         }
                         Some(Direction::Left) => {
-                            let left_idx = self.get_index(row, col - 1);
-                            let ground_row = min(
-                                self.find_ground_row(row, col),
-                                self.find_ground_row(row, col - 1),
-                            );
-                            let new_idx_1 = self.get_index(ground_row, col);
-                            let new_idx_2 = self.get_index(ground_row, col - 1);
-                            //self.delete_board_piece(curr_idx, left_idx);
-                            //let sprite = self.sprite_data[curr_idx].unwrap();
-                            //self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Left);
+                            match self.piece_part_data[curr_idx] {
+                                Some(PiecePart::Head) => {}
+                                Some(PiecePart::Tail) => {
+                                    let right_idx = self.get_index(row, col + 1);
+                                    let ground_row = min(
+                                        self.find_ground_row(row, col),
+                                        self.find_ground_row(row, col + 1),
+                                    );
+                                    let new_idx_1 = self.get_index(ground_row, col + 1);
+                                    let new_idx_2 = self.get_index(ground_row, col);
+                                    let sprite = self.sprite_data[curr_idx].unwrap();
+                                    self.delete_board_piece(right_idx, curr_idx);
+                                    self.place_piece(new_idx_1, new_idx_2, sprite, Direction::Left);
+                                }
+                                None => panic!("No piece part found"),
+                            };
                         }
                         None => {}
                     }
