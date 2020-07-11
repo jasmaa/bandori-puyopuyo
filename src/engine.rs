@@ -24,6 +24,7 @@ pub struct Engine {
     affiliation_data: Vec<Option<Affiliation>>,
     direction_data: Vec<Option<Direction>>,
     piece_part_data: Vec<Option<PiecePart>>,
+    is_clearing: bool,
 }
 
 #[wasm_bindgen]
@@ -38,6 +39,7 @@ impl Engine {
             affiliation_data: (0..width * height).map(|_| None).collect(),
             direction_data: (0..width * height).map(|_| None).collect(),
             piece_part_data: (0..width * height).map(|_| None).collect(),
+            is_clearing: false,
         };
         engine.respawn_piece(Sprite::Kasumi);
         engine
@@ -53,6 +55,10 @@ impl Engine {
 
     pub fn render(&self) -> String {
         self.to_string()
+    }
+
+    pub fn get_is_clearing(&self) -> bool {
+        self.is_clearing
     }
 
     // Move piece right
@@ -220,36 +226,6 @@ impl Engine {
         }
     }
 
-    // Checks if piece can be moved down
-    pub fn can_move_piece_down(&mut self) -> bool {
-        match self.piece.direction {
-            Direction::Up => {
-                let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
-                self.piece.row < self.height - 1
-                    && self.affiliation_data[down_idx] == None
-                    && self.affiliation_data[down_idx] == None
-            }
-            Direction::Right => {
-                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
-                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col + 1);
-                self.piece.row < self.height - 1
-                    && self.affiliation_data[down_idx_1] == None
-                    && self.affiliation_data[down_idx_2] == None
-            }
-            Direction::Down => {
-                let down_idx = self.get_index(self.piece.row + 2, self.piece.col);
-                self.piece.row + 1 < self.height - 1 && self.affiliation_data[down_idx] == None
-            }
-            Direction::Left => {
-                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
-                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col - 1);
-                self.piece.row < self.height - 1
-                    && self.affiliation_data[down_idx_1] == None
-                    && self.affiliation_data[down_idx_2] == None
-            }
-        }
-    }
-
     // Rotate piece clockwise
     pub fn rotate_piece(&mut self) {
         match self.piece.direction {
@@ -298,14 +274,26 @@ impl Engine {
 
     // Update game
     pub fn tick(&mut self) {
-        if self.can_move_piece_down() {
-            self.move_piece_down();
-        } else {
-            // Check if can clear
-            if self.count_blob(self.piece.row, self.piece.col) >= 10 {
-                self.clear_blob(self.piece.row, self.piece.col);
-                self.apply_gravity(); // TODO: do repeated clearing and gravity
+        if !self.is_clearing {
+            if self.can_move_piece_down() {
+                self.move_piece_down();
+            } else {
+                self.is_clearing = true;
             }
+        }
+        if self.is_clearing {
+            // Clear combo
+            for row in 0..self.height {
+                for col in 0..self.width {
+                    if self.count_blob(row, col) >= 10 {
+                        self.clear_blob(row, col);
+                        self.apply_gravity();
+                        return;
+                    }
+                }
+            }
+
+            self.is_clearing = false;
 
             // Respawn with random sprite
             let v = (js_sys::Math::random() * 10.0) as u32;
@@ -315,6 +303,7 @@ impl Engine {
 }
 
 impl Engine {
+    // Respawns piece at the top
     pub fn respawn_piece(&mut self, sprite: Sprite) {
         self.piece.row = 0;
         self.piece.col = self.width / 2;
@@ -329,6 +318,36 @@ impl Engine {
     // Calculates index from grid row and column
     pub fn get_index(&self, row: u32, col: u32) -> usize {
         (self.width * row + col) as usize
+    }
+
+    // Checks if piece can be moved down
+    pub fn can_move_piece_down(&mut self) -> bool {
+        match self.piece.direction {
+            Direction::Up => {
+                let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx] == None
+                    && self.affiliation_data[down_idx] == None
+            }
+            Direction::Right => {
+                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
+                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col + 1);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx_1] == None
+                    && self.affiliation_data[down_idx_2] == None
+            }
+            Direction::Down => {
+                let down_idx = self.get_index(self.piece.row + 2, self.piece.col);
+                self.piece.row + 1 < self.height - 1 && self.affiliation_data[down_idx] == None
+            }
+            Direction::Left => {
+                let down_idx_1 = self.get_index(self.piece.row + 1, self.piece.col);
+                let down_idx_2 = self.get_index(self.piece.row + 1, self.piece.col - 1);
+                self.piece.row < self.height - 1
+                    && self.affiliation_data[down_idx_1] == None
+                    && self.affiliation_data[down_idx_2] == None
+            }
+        }
     }
 
     // Counts blob with floodfill
@@ -439,7 +458,7 @@ impl Engine {
         self.piece_part_data[idx_2] = None;
     }
 
-    // TODO: need to find whether piece is head or tail
+    // Applies gravity to pieces
     fn apply_gravity(&mut self) {
         for row in (0..self.height - 1).rev() {
             for col in 0..self.width {

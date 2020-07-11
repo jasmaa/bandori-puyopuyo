@@ -6,7 +6,7 @@ const engine = Engine.new(9, 20);
 
 window.onkeydown = e => {
 
-    if (engine.can_move_piece_down()) {
+    if (!engine.get_is_clearing()) {
         switch (e.keyCode) {
             case 39:
                 engine.move_piece_right();
@@ -26,7 +26,7 @@ window.onkeydown = e => {
 }
 
 let startTime = new Date().getTime();
-const UPDATE_DELTA = 1000;
+const UPDATE_DELTA = 500;
 
 function tick() {
 
