@@ -283,6 +283,7 @@ impl Engine {
         }
         if self.is_clearing {
             // Clear combo
+            // TODO: this is still buggy
             for row in 0..self.height {
                 for col in 0..self.width {
                     if self.count_blob(row, col) >= 10 {
@@ -296,7 +297,7 @@ impl Engine {
             self.is_clearing = false;
 
             // Respawn with random sprite
-            let v = (js_sys::Math::random() * 10.0) as u32;
+            let v = (js_sys::Math::random() * 25.0) as u32;
             self.respawn_piece(Sprite::from_u32(v));
         }
     }
