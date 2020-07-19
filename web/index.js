@@ -1,5 +1,8 @@
 import { Engine, Affiliation } from 'bandori-puyopuyo';
 import { memory } from 'bandori-puyopuyo/bandori_puyopuyo_bg';
+import * as sprites from './sprites';
+
+console.log(Affiliation);
 
 const board = document.getElementById('board');
 const engine = Engine.new(9, 20);
@@ -43,3 +46,13 @@ function tick() {
 }
 
 requestAnimationFrame(tick);
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+
+let counter = 0;
+setInterval(() => {
+    counter += 0.05;
+    ctx.clearRect(0, 0, 500, 500);
+    sprites.drawPiece(ctx, 1, true, 100, 100, counter);
+}, 10);
