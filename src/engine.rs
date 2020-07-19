@@ -53,12 +53,25 @@ impl Engine {
         self.height
     }
 
-    pub fn render(&self) -> String {
-        self.to_string()
-    }
-
     pub fn get_is_clearing(&self) -> bool {
         self.is_clearing
+    }
+
+    pub fn get_sprite_data(&self) -> *const Option<Sprite> {
+        self.sprite_data.as_ptr()
+    }
+
+    pub fn get_direction_data(&self) -> *const Option<Direction> {
+        self.direction_data.as_ptr()
+    }
+
+    pub fn get_piece_part_data(&self) -> *const Option<PiecePart> {
+        self.piece_part_data.as_ptr()
+    }
+
+    // Calculates index from grid row and column
+    pub fn get_index(&self, row: u32, col: u32) -> usize {
+        (self.width * row + col) as usize
     }
 
     // Move piece right
@@ -234,9 +247,9 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row - 1, self.piece.col);
                 let right_idx = self.get_index(self.piece.row, self.piece.col + 1);
                 if self.piece.col + 1 < self.width && self.affiliation_data[right_idx] == None {
+                    self.piece.direction = Direction::Right;
                     self.delete_board_piece(curr_idx_1, curr_idx_2);
                     self.place_board_piece(curr_idx_1, right_idx);
-                    self.piece.direction = Direction::Right;
                 }
             }
             Direction::Right => {
@@ -244,9 +257,9 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col + 1);
                 let down_idx = self.get_index(self.piece.row + 1, self.piece.col);
                 if self.piece.row + 1 < self.height && self.affiliation_data[down_idx] == None {
+                    self.piece.direction = Direction::Down;
                     self.delete_board_piece(curr_idx_1, curr_idx_2);
                     self.place_board_piece(curr_idx_1, down_idx);
-                    self.piece.direction = Direction::Down;
                 }
             }
             Direction::Down => {
@@ -254,9 +267,9 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
                 let left_idx = self.get_index(self.piece.row, self.piece.col - 1);
                 if self.piece.col as i32 - 1 >= 0 && self.affiliation_data[left_idx] == None {
+                    self.piece.direction = Direction::Left;
                     self.delete_board_piece(curr_idx_1, curr_idx_2);
                     self.place_board_piece(curr_idx_1, left_idx);
-                    self.piece.direction = Direction::Left;
                 }
             }
             Direction::Left => {
@@ -264,9 +277,9 @@ impl Engine {
                 let curr_idx_2 = self.get_index(self.piece.row, self.piece.col - 1);
                 let up_idx = self.get_index(self.piece.row - 1, self.piece.col);
                 if self.piece.row as i32 - 1 >= 0 && self.affiliation_data[up_idx] == None {
+                    self.piece.direction = Direction::Up;
                     self.delete_board_piece(curr_idx_1, curr_idx_2);
                     self.place_board_piece(curr_idx_1, up_idx);
-                    self.piece.direction = Direction::Up;
                 }
             }
         }
@@ -314,11 +327,6 @@ impl Engine {
         let idx_1 = self.get_index(self.piece.row, self.piece.col);
         let idx_2 = self.get_index(self.piece.row + 1, self.piece.col);
         self.place_board_piece(idx_1, idx_2);
-    }
-
-    // Calculates index from grid row and column
-    pub fn get_index(&self, row: u32, col: u32) -> usize {
-        (self.width * row + col) as usize
     }
 
     // Checks if piece can be moved down
@@ -556,7 +564,7 @@ impl Engine {
 
 impl fmt::Display for Engine {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.affiliation_data.as_slice().chunks(self.width as usize) {
+        for line in self.direction_data.as_slice().chunks(self.width as usize) {
             for &cell in line {
                 let symbol = match cell {
                     Some(v) => format!("{}", v as i32),

@@ -1,11 +1,23 @@
-import { Engine, Affiliation } from 'bandori-puyopuyo';
+import { Engine } from 'bandori-puyopuyo';
 import { memory } from 'bandori-puyopuyo/bandori_puyopuyo_bg';
 import * as sprites from './sprites';
 
-console.log(Affiliation);
+const width = 9;
+const height = 20;
 
-const board = document.getElementById('board');
-const engine = Engine.new(9, 20);
+const engine = Engine.new(width, height);
+
+const spriteDataPtr = engine.get_sprite_data();
+const directionDataPtr = engine.get_direction_data();
+const piecePartDataPtr = engine.get_piece_part_data();
+const spriteData = new Uint8Array(memory.buffer, spriteDataPtr, width * height);
+const directionData = new Uint8Array(memory.buffer, directionDataPtr, width * height);
+const piecePartData = new Uint8Array(memory.buffer, piecePartDataPtr, width * height);
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+ctx.canvas.width = 32 * width;
+ctx.canvas.height = 32 * height;
 
 window.onkeydown = e => {
 
@@ -24,8 +36,46 @@ window.onkeydown = e => {
                 engine.rotate_piece();
         }
     }
+}
 
-    //console.log(e);
+/**
+ * Draws grid
+ */
+function drawGrid() {
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+
+    // Vertical lines.
+    for (let i = 0; i <= width; i++) {
+        ctx.moveTo(i * 32, 0);
+        ctx.lineTo(i * 32, 32 * height);
+    }
+
+    // Horizontal lines.
+    for (let j = 0; j <= height; j++) {
+        ctx.moveTo(0, j * 32);
+        ctx.lineTo(32 * width, j * 32);
+    }
+
+    ctx.stroke();
+}
+
+/**
+ * Draws pieces
+ */
+function drawPieces() {
+
+    for (let row = 0; row < engine.get_height(); row++) {
+        for (let col = 0; col < engine.get_width(); col++) {
+            const idx = engine.get_index(row, col);
+            const memberNum = spriteData[idx];
+            if (memberNum < 25) {
+                const directionNum = directionData[idx];
+                const piecePart = piecePartData[idx];
+                sprites.drawPiece(ctx, memberNum, piecePart === 0, 32 * col, 32 * row, directionNum);
+            }
+        }
+    }
 }
 
 let startTime = new Date().getTime();
@@ -33,7 +83,10 @@ const UPDATE_DELTA = 500;
 
 function tick() {
 
-    board.innerHTML = engine.render();
+    // Render to canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    drawPieces();
 
     const currTime = new Date().getTime();
     const delta = currTime - startTime;
@@ -46,13 +99,3 @@ function tick() {
 }
 
 requestAnimationFrame(tick);
-
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
-
-let counter = 0;
-setInterval(() => {
-    counter += 0.05;
-    ctx.clearRect(0, 0, 500, 500);
-    sprites.drawPiece(ctx, 1, true, 100, 100, counter);
-}, 10);

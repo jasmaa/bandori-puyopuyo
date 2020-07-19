@@ -121,6 +121,13 @@ const spriteLookup = [
     KOKORO, KAORU, HAGUMI, KANON, MISAKI,
 ];
 
+const directionLookup = [
+    Math.PI,
+    -Math.PI / 2,
+    0,
+    Math.PI / 2,
+];
+
 /**
  * Draws sprite on canvas
  * 
@@ -129,14 +136,14 @@ const spriteLookup = [
  * @param {*} dx 
  * @param {*} dy 
  */
-export function drawPiece(ctx, spriteNum, isHead, dx, dy, rotation) {
+export function drawPiece(ctx, memberNum, isHead, dx, dy, directionNum) {
 
-    const member = spriteLookup[spriteNum];
+    const member = spriteLookup[memberNum];
     const sprite = isHead ? member.head : member.tail;
 
     ctx.save();
-    ctx.translate(dx, dy);
-    ctx.rotate(rotation);
+    ctx.translate(dx + 16, dy + 16);
+    ctx.rotate(directionLookup[directionNum]);
 
     ctx.drawImage(
         spritesheet,
