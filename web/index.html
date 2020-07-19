@@ -3,6 +3,17 @@
 
 <head>
     <meta charset="utf-8">
+    <style>
+        canvas {
+            margin-right: auto;
+            margin-left: auto;
+            display: block;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+    </style>
     <title>Bandori Puyo-Puyo</title>
 </head>
 
@@ -14,8 +25,9 @@
 
     <canvas id="game-canvas" width="500" height="500">
     </canvas>
+
     <img id="spritesheet" src="./sprites.png" hidden />
-    
+
     <script src="./bootstrap.js"></script>
 </body>
 

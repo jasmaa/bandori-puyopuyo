@@ -2,6 +2,8 @@
 
 WIP implementation of Bandori PuyoPuyo from Oomori
 
+![Game screenshot](/docs/screenshot.png)
+
 ## Usage
 
     # Build wasm
