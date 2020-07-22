@@ -3,7 +3,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-    entry: './bootstrap.js',
+    entry: './src/bootstrap.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: "bootstrap.js",
@@ -12,7 +12,7 @@ module.exports = {
         new CleanWebpackPlugin(),
         new CopyPlugin({
             patterns: [
-                { from: 'index.html', to: path.resolve(__dirname, 'dist') },
+                { from: 'public/*', to: path.resolve(__dirname, 'dist'), flatten: true },
             ],
         }),
     ],
