@@ -1,5 +1,6 @@
 // engine.rs
 // PuyoPuyo engine
+
 use std::cmp::min;
 use std::fmt;
 use wasm_bindgen::prelude::*;
@@ -25,12 +26,13 @@ pub struct Engine {
     direction_data: Vec<Option<Direction>>,
     piece_part_data: Vec<Option<PiecePart>>,
     is_clearing: bool,
+    is_game_over: bool,
 }
 
 #[wasm_bindgen]
 impl Engine {
     pub fn new(width: u32, height: u32) -> Engine {
-        console_error_panic_hook::set_once();
+        // console_error_panic_hook::set_once();
         let mut engine = Engine {
             width: width,
             height: height,
@@ -40,6 +42,7 @@ impl Engine {
             direction_data: (0..width * height).map(|_| None).collect(),
             piece_part_data: (0..width * height).map(|_| None).collect(),
             is_clearing: false,
+            is_game_over: false,
         };
         engine.respawn_piece(Sprite::Kasumi);
         engine
@@ -55,6 +58,10 @@ impl Engine {
 
     pub fn get_is_clearing(&self) -> bool {
         self.is_clearing
+    }
+
+    pub fn get_is_game_over(&self) -> bool {
+        self.is_game_over
     }
 
     pub fn get_sprite_data(&self) -> *const Option<Sprite> {
@@ -287,36 +294,59 @@ impl Engine {
 
     // Update game
     pub fn tick(&mut self) {
-        if !self.is_clearing {
-            if self.can_move_piece_down() {
-                self.move_piece_down();
-            } else {
-                self.is_clearing = true;
-            }
-        }
-        if self.is_clearing {
-            // Clear combo
-            // TODO: this is still buggy
-            for row in 0..self.height {
-                for col in 0..self.width {
-                    if self.count_blob(row, col) >= 10 {
-                        self.clear_blob(row, col);
-                        self.apply_gravity();
-                        return;
-                    }
+        if !self.is_game_over {
+            if !self.is_clearing {
+                if self.can_move_piece_down() {
+                    self.move_piece_down();
+                } else {
+                    self.is_clearing = true;
                 }
             }
-
-            self.is_clearing = false;
-
-            // Respawn with random sprite
-            let v = (js_sys::Math::random() * 25.0) as u32;
-            self.respawn_piece(Sprite::from_u32(v));
+            if self.is_clearing {
+                // Clear combo
+                // TODO: this is still buggy
+                for row in 0..self.height {
+                    for col in 0..self.width {
+                        if self.count_blob(row, col) >= 10 {
+                            self.clear_blob(row, col);
+                            self.apply_gravity();
+                            return;
+                        }
+                    }
+                }
+                self.is_clearing = false;
+                // Respawn with random sprite
+                if self.can_respawn_piece() {
+                    let v = (js_sys::Math::random() * 25.0) as u32;
+                    self.respawn_piece(Sprite::from_u32(v));
+                } else {
+                    self.is_game_over = true
+                }
+            }
+        } else {
+            self.reset();
         }
+    }
+
+    // Reset game
+    pub fn reset(&mut self) {
+        self.sprite_data.iter_mut().for_each(|e| *e = None);
+        self.affiliation_data.iter_mut().for_each(|e| *e = None);
+        self.direction_data.iter_mut().for_each(|e| *e = None);
+        self.piece_part_data.iter_mut().for_each(|e| *e = None);
+        self.is_clearing = false;
+        self.is_game_over = false;
+        self.respawn_piece(Sprite::Kasumi);
     }
 }
 
 impl Engine {
+    pub fn can_respawn_piece(&self) -> bool {
+        let idx_1 = self.get_index(0, self.width / 2);
+        let idx_2 = self.get_index(1, self.width / 2);
+        self.affiliation_data[idx_1] == None && self.affiliation_data[idx_2] == None
+    }
+
     // Respawns piece at the top
     pub fn respawn_piece(&mut self, sprite: Sprite) {
         self.piece.row = 0;
@@ -564,7 +594,7 @@ impl Engine {
 
 impl fmt::Display for Engine {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in self.direction_data.as_slice().chunks(self.width as usize) {
+        for line in self.affiliation_data.as_slice().chunks(self.width as usize) {
             for &cell in line {
                 let symbol = match cell {
                     Some(v) => format!("{}", v as i32),

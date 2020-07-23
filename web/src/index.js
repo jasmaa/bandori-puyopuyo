@@ -21,7 +21,7 @@ ctx.canvas.height = 32 * height;
 
 window.onkeydown = e => {
 
-    if (!engine.get_is_clearing()) {
+    if (!engine.get_is_game_over() && !engine.get_is_clearing()) {
         switch (e.keyCode) {
             case 39:
                 engine.move_piece_right();
