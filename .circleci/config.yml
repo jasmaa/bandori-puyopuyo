@@ -5,10 +5,8 @@ jobs:
             - image: circleci/rust:latest
         steps:
             - checkout
-            - run: pwd
             - run: cargo install wasm-pack
             - run: wasm-pack build
-            - run: ls
             - persist_to_workspace:
                 root: /home/circleci/project
                 paths:
@@ -20,6 +18,8 @@ jobs:
             - checkout
             - attach_workspace:
                 at: /home/circleci/project/pkg
+            - run: pwd
+            - run: ls
             - run: npm --prefix web install
             - run: npm --prefix web run build
 
