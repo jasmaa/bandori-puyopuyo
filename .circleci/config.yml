@@ -10,7 +10,6 @@ jobs:
     deploy:
         docker:
             - image: circleci/node:latest
-        workdir: web
         steps:
             - checkout
             - run: npm --prefix web install
@@ -21,4 +20,6 @@ workflows:
     build_and_deploy:
         jobs:
             - build
-            - deploy
+            - deploy:
+                requires:
+                    - build
