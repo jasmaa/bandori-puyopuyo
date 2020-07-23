@@ -24,7 +24,7 @@ jobs:
         steps:
             - checkout
             - attach_workspace:
-                at: /home/circleci/project/pkg
+                at: /home/circleci/project
             - run: pwd
             - run: ls
             - run: cd pkg && ls
