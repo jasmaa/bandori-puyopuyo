@@ -5,6 +5,7 @@ jobs:
             - image: circleci/rust:latest
         steps:
             - checkout
+            - run: pwd
             - run: cargo install wasm-pack
             - run: wasm-pack build
             - persist_to_workspace:
