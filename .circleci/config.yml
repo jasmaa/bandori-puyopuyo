@@ -1,0 +1,13 @@
+version: 2.1
+jobs:
+    build:
+        docker:
+            - image: circleci/rust:latest
+            - image: circleci/node:latest
+        
+        steps:
+            - checkout
+            - run: cargo install wasm-pack
+            - run: wasm-pack build
+            - run: npm --prefix ./web install
+            - run: npm --prefix ./web run build
