@@ -1,8 +1,16 @@
 version: 2.1
-jobs:
-    build:
+
+executors:
+    rust-executor:
         docker:
             - image: circleci/rust:latest
+    node-executor:
+        docker:
+            - image: circleci/node:latest
+
+jobs:
+    build:
+        executor: rust-executor
         steps:
             - checkout
             - run: cargo install wasm-pack
@@ -10,8 +18,7 @@ jobs:
             - persist_to_workspace:
                 root: pkg
     deploy:
-        docker:
-            - image: circleci/node:latest
+        executor: node-executor
         steps:
             - checkout
             - attach_workspace:
