@@ -4,7 +4,6 @@ jobs:
         docker:
             - image: circleci/rust:latest
             - image: circleci/node:latest
-        
         steps:
             - checkout
             - run: cargo install wasm-pack
