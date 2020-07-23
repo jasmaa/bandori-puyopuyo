@@ -20,6 +20,7 @@ jobs:
                 at: /home/circleci/project/pkg
             - run: pwd
             - run: ls
+            - run: ls pkg
             - run: npm --prefix web install
             - run: npm --prefix web run build
 
