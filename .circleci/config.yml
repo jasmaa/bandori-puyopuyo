@@ -6,11 +6,13 @@ jobs:
         steps:
             - checkout
             - run: pwd
-            - run: cargo install wasm-pack
-            - run: wasm-pack build
+            - run: ls
+            #- run: cargo install wasm-pack
+            #- run: wasm-pack build
             - persist_to_workspace:
                 root: /home/circleci/project
-                path: pkg
+                paths:
+                    - pkg
     deploy:
         docker:
             - image: circleci/node:latest
