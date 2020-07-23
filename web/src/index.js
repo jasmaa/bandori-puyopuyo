@@ -19,7 +19,7 @@ const ctx = canvas.getContext('2d');
 ctx.canvas.width = 32 * width;
 ctx.canvas.height = 32 * height;
 const scoreboard = document.getElementById('scoreboard');
-const resetBut = document.getElementById('resetBut');
+const startBut = document.getElementById('startBut');
 
 window.onkeydown = e => {
 
@@ -40,8 +40,9 @@ window.onkeydown = e => {
     }
 }
 
-resetBut.onclick = () => {
+startBut.onclick = () => {
     engine.reset();
+    requestAnimationFrame(tick);
 }
 
 /**
@@ -100,22 +101,27 @@ function tick() {
     drawPieces();
 
     if (engine.get_is_game_over()) {
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
         ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-    }
 
-    const currTime = new Date().getTime();
-    const delta = currTime - startTime;
-    if (delta >= UPDATE_DELTA) {
-        engine.tick();
-        startTime = currTime;
-    }
+    } else {
 
-    requestAnimationFrame(tick);
+        const currTime = new Date().getTime();
+        const delta = currTime - startTime;
+        if (delta >= UPDATE_DELTA) {
+            engine.tick();
+            startTime = currTime;
+        }
+
+        requestAnimationFrame(tick);
+    }
 }
 
-requestAnimationFrame(tick);
+// Init
+drawGrid();
+scoreboard.innerHTML = `Score: ${engine.get_score()}`;
