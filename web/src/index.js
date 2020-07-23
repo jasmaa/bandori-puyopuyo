@@ -18,6 +18,8 @@ const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 ctx.canvas.width = 32 * width;
 ctx.canvas.height = 32 * height;
+const scoreboard = document.getElementById('scoreboard');
+const resetBut = document.getElementById('resetBut');
 
 window.onkeydown = e => {
 
@@ -36,6 +38,10 @@ window.onkeydown = e => {
                 engine.rotate_piece();
         }
     }
+}
+
+resetBut.onclick = () => {
+    engine.reset();
 }
 
 /**
@@ -79,14 +85,28 @@ function drawPieces() {
 }
 
 let startTime = new Date().getTime();
-const UPDATE_DELTA = 500;
+const UPDATE_DELTA = 300;
 
+/**
+ * Tick to update game
+ */
 function tick() {
+
+    scoreboard.innerHTML = `Score: ${engine.get_score()}`;
 
     // Render to canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
     drawPieces();
+
+    if (engine.get_is_game_over()) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+    }
 
     const currTime = new Date().getTime();
     const delta = currTime - startTime;

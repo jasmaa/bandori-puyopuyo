@@ -25,6 +25,8 @@ pub struct Engine {
     affiliation_data: Vec<Option<Affiliation>>,
     direction_data: Vec<Option<Direction>>,
     piece_part_data: Vec<Option<PiecePart>>,
+    score: u32,
+    combo_count: u32,
     is_clearing: bool,
     is_game_over: bool,
 }
@@ -41,6 +43,8 @@ impl Engine {
             affiliation_data: (0..width * height).map(|_| None).collect(),
             direction_data: (0..width * height).map(|_| None).collect(),
             piece_part_data: (0..width * height).map(|_| None).collect(),
+            score: 0,
+            combo_count: 1,
             is_clearing: false,
             is_game_over: false,
         };
@@ -54,6 +58,10 @@ impl Engine {
 
     pub fn get_height(&self) -> u32 {
         self.height
+    }
+
+    pub fn get_score(&self) -> u32 {
+        self.score
     }
 
     pub fn get_is_clearing(&self) -> bool {
@@ -307,14 +315,19 @@ impl Engine {
                 // TODO: this is still buggy
                 for row in 0..self.height {
                     for col in 0..self.width {
-                        if self.count_blob(row, col) >= 10 {
+                        let blob_count = self.count_blob(row, col);
+                        if blob_count >= 10 {
+                            self.score += self.combo_count * blob_count;
+                            self.combo_count += 1;
                             self.clear_blob(row, col);
                             self.apply_gravity();
                             return;
                         }
                     }
                 }
+                self.combo_count = 1;
                 self.is_clearing = false;
+
                 // Respawn with random sprite
                 if self.can_respawn_piece() {
                     let v = (js_sys::Math::random() * 25.0) as u32;
@@ -323,8 +336,6 @@ impl Engine {
                     self.is_game_over = true
                 }
             }
-        } else {
-            self.reset();
         }
     }
 
@@ -334,6 +345,7 @@ impl Engine {
         self.affiliation_data.iter_mut().for_each(|e| *e = None);
         self.direction_data.iter_mut().for_each(|e| *e = None);
         self.piece_part_data.iter_mut().for_each(|e| *e = None);
+        self.score = 0;
         self.is_clearing = false;
         self.is_game_over = false;
         self.respawn_piece(Sprite::Kasumi);

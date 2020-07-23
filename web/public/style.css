@@ -1,10 +1,18 @@
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.ui-card {
+    background-color: white;
+    padding: 2em;
+    margin: 1em;
+    border-radius: 0.3em;
+}
+
 canvas {
-    background-color: lightsteelblue;
-    outline-style: solid;
-    outline-width: 2px;
-    margin-right: auto;
-    margin-left: auto;
-    display: block;
+    background-color: #dddddd;
 
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
@@ -13,5 +21,5 @@ canvas {
 }
 
 body {
-    background-color: slategray;
+    background-image: url("./bg00.png");
 }
