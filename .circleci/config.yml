@@ -1,0 +1,32 @@
+version: 2.1
+jobs:
+    build-wasm:
+        docker:
+            - image: circleci/rust:latest
+        steps:
+            - checkout
+            - run: cargo install wasm-pack
+            - run: wasm-pack build
+            - persist_to_workspace:
+                root: /home/circleci/project
+                paths:
+                    - pkg
+    deploy:
+        docker:
+            - image: circleci/node:latest
+        steps:
+            - checkout
+            - attach_workspace:
+                at: /home/circleci/project
+            - run: npm --prefix web install
+            - run: npm --prefix web run build
+            - run: npm --prefix web run deploy
+
+workflows:
+    version: 2
+    build_and_deploy:
+        jobs:
+            - build-wasm
+            - deploy:
+                requires:
+                    - build-wasm
