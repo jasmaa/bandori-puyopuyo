@@ -2,7 +2,7 @@ version: 2.1
 jobs:
     build-wasm:
         docker:
-            - image: jasmaa/ircleci-rust-wasm-pack:latest
+            - image: jasmaa/circleci-rust-wasm-pack:latest
         steps:
             - checkout
             - run: wasm-pack build
